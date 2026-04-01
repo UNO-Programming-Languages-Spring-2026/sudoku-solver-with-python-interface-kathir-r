@@ -1,3 +1,4 @@
+import sys
 import clingo
 from sudoku_board import Sudoku
 
@@ -12,7 +13,7 @@ class Context:
         for position, value in self.board.sudoku.items():
             row = position[0]
             col = position[1]
-            args = [clingo.Number(row), clingo.Number(col), clingo.Number(value)]
+            args = [clingo.symbol.Number(row), clingo.symbol.Number(col), clingo.symbol.Number(value)]
             symbols.append(clingo.symbol.Function("", args))
         return symbols
     
@@ -52,9 +53,16 @@ class SudokuSolver(clingo.application.Application):
 
     def main(self, ctl, files):
         ctl.load("sudoku.lp")
-        for f in (files if files else ["-"]):
-            ctl.load(f)
-        ctl.ground([("base", [])])
+        ctl.load("sudoku_py.lp")
+
+        if files:
+            board = Sudoku.from_str(open(files[0]).read())
+        else:
+            board = Sudoku.from_str(sys.stdin.read())
+
+        self.board = board
+        ctx = Context(self.board)
+        ctl.ground([("base", [])], context=ctx)
         return ctl.solve()
 
 def run():

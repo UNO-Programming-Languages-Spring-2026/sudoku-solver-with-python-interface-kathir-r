@@ -9,6 +9,22 @@ class Sudoku:
     def __str__(self) -> str:
         s = ""
         # YOUR CODE HERE
+        for i in range(1, 10):
+            cells = []
+            for j in range(1, 10):
+                cells.append(str(self.sudoku[(i, j)]))
+
+            group1 = " ".join(cells[0:3])
+            group2 = " ".join(cells[3:6])
+            group3 = " ".join(cells[6:9])
+    
+            s += "  ".join([group1, group2, group3])
+    
+            if i != 9:
+                s += "\n"
+            if i in (3, 6):
+                s += "\n"
+        
         return s
 
     @classmethod

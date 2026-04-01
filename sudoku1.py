@@ -1,30 +1,28 @@
-import clingo
 import sys
+import clingo
 
-def load_files(ctl, files):
-    for f in files:
-        ctl.load(f)
+def sorted_atoms(model):
+    return sorted(str(s) for s in model.symbols(shown=True))
 
-def print_model(model):
-    atoms = list(model.symbols(shown=True))
-    atoms.sort()
-    print("Answer:", model.number)
-    print(" ".join(map(str, atoms)))
+class Solver(clingo.application.Application):
+    program_name = "sudoku-solver"
+    version = "1.0"
 
-class SolverApp(clingo.Application):
-    def __init__(self):
-        super().__init__()
-        self.program_name = "sudoku"
+    def print_model(self, model, printer):
+        print(" ".join(sorted_atoms(model)))
+
+    def load_files(self, ctl, files):
+        for f in (files if files else ["-"]):
+            ctl.load(f)
 
     def main(self, ctl, files):
         ctl.load("sudoku.lp")
-        load_files(ctl, files)
+        self.load_files(ctl, files)
         ctl.ground([("base", [])])
-        ctl.solve(on_model=print_model)
+        return ctl.solve()
 
-def solve(encoding, inputs):
-    app = SolverApp()
-    clingo.clingo_main(app, inputs)
+def run():
+    clingo.application.clingo_main(Solver(), sys.argv[1:])
 
 if __name__ == "__main__":
-    solve("sudoku.lp", sys.argv[1:])
+    run()
